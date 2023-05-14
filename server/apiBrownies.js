@@ -3,8 +3,10 @@ const bodyParser = require("body-parser");
 const jwt = require("jsonwebtoken");
 const bcrypt = require("bcrypt");
 const fs = require("fs");
+const cors = require("cors");
 
 const app = express();
+app.use(cors());
 app.use(bodyParser.json());
 
 let products = [];
@@ -37,16 +39,18 @@ function saveUsers(users) {
 
 // Rota de cadastro de usuário
 app.post("/signup", (req, res) => {
-  const { username, password, name, confirmPassword } = req.body;
+  const { username, password, email, confirmPassword } = req.body;
 
   // Verifica se usuário já existe
   const users = getUsers();
   const user = users.find((u) => u.username === username);
+
   if (user) {
     return res.status(409).send({ message: "Usuário já existe" });
   }
 
   // Verifica se a senha e a confirmação de senha são iguais
+
   if (password !== confirmPassword) {
     return res
       .status(400)
@@ -60,7 +64,7 @@ app.post("/signup", (req, res) => {
     }
 
     // Cria novo usuário com senha em hash
-    const newUser = { username, name, password: hash };
+    const newUser = { username, email, password: hash };
 
     // Adiciona novo usuário ao array de usuários e salva no arquivo
     users.push(newUser);
